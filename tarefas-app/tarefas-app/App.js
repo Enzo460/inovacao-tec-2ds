@@ -17,6 +17,13 @@ export default function App() {
     { id: '2', texto: 'Modelar banco de dados', concluida: false },
   ]);
 
+const item = {
+      id: Date.now().toString(),
+      texto: novaTarefa,
+      concluida: false,
+      prioridade: 'alta', // Define 'alta' para teste ou 'normal'
+    };
+
   // Função para adicionar uma nova tarefa à lista
   const adicionarTarefa = () => {
     if (novaTarefa.trim() === '') return;
@@ -41,6 +48,16 @@ export default function App() {
     });
     setTarefas(tarefasAtualizadas);
   };
+ // --- INÍCIO DO INCREMENTO: Estado e Lógica do Filtro ---
+  const [filtro, setFiltro] = useState('todas'); // Opções: 'todas', 'pendentes', 'concluidas'
+
+  // Função para filtrar as tarefas dinamicamente antes de exibir na FlatList
+  const tarefasFiltradas = tarefas.filter((t) => {
+    if (filtro === 'pendentes') return !t.concluida;
+    if (filtro === 'concluidas') return t.concluida;
+    return true; // Se for 'todas'
+  });
+  // --- FIM DO INCREMENTO —
 
   // Função para remover uma tarefa da lista
   const removerTarefa = (id) => {
@@ -66,14 +83,43 @@ export default function App() {
           value={novaTarefa}
           onChangeText={setNovaTarefa}
         />
+         {/* --- INÍCIO DO INCREMENTO: Botões de Filtro --- */}
+      <View style={styles.filtroContainer}>
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'todas' && styles.filtroAtivo]}
+          onPress={() => setFiltro('todas')}>
+          <Text style={[styles.textoFiltro, filtro === 'todas' && styles.textoFiltroAtivo]}>Todas</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'pendentes' && styles.filtroAtivo]}
+          onPress={() => setFiltro('pendentes')}>
+          <Text style={[styles.textoFiltro, filtro === 'pendentes' && styles.textoFiltroAtivo]}>Pendentes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botaoFiltro, filtro === 'concluidas' && styles.filtroAtivo]}
+          onPress={() => setFiltro('concluidas')}>
+          <Text style={[styles.textoFiltro, filtro === 'concluidas' && styles.textoFiltroAtivo]}>Concluídas</Text>
+        </TouchableOpacity>
+      </View>
+      {/* --- FIM DO INCREMENTO --- */}
+
+
         <TouchableOpacity style={styles.botaoAdicionar} onPress={adicionarTarefa}>
           <Text style={styles.textoBotao}>+</Text>
         </TouchableOpacity>
       </View>
 
+  <View style={[
+            styles.cardTarefa,
+            { borderLeftColor: item.prioridade === 'alta' ? '#EF4444' : '#2563EB' }
+          ]}>
+
+
       {/* Lista de tarefas */}
       <FlatList
-        data={tarefas}
+        data={tarefasFiltradas}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.cardTarefa}>
@@ -168,6 +214,31 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#94A3B8',
   },
+   // --- INÍCIO DO INCREMENTO: Estilos do Filtro ---
+  filtroContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 15,
+  },
+  botaoFiltro: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: '#E2E8F0',
+  },
+  filtroAtivo: {
+    backgroundColor: '#2563EB',
+  },
+  textoFiltro: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#64748B',
+  },
+  textoFiltroAtivo: {
+    color: '#FFFFFF',
+  },
+  // --- FIM DO INCREMENTO —
+
   textoRemover: {
     fontSize: 18,
     paddingLeft: 10,
@@ -180,4 +251,3 @@ contador: {
  marginBottom: 15,
 }
 });
-
